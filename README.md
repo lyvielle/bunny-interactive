@@ -37,8 +37,8 @@ Browser / PWA  <--HTTPS-->  [reverse proxy]  <-->  Bunny Interactive (Flask, :80
 
 ```bash
 git clone https://github.com/lyvielle/bunny-interactive && cd bunny-interactive
-# edit docker-compose.yml: set BUNNY_API, HWID_SALT, SECRET_KEY (and optionally REMEMBER_KEY)
-docker compose up -d --build
+# all settings are environment variables (see table below); HWID_SALT and SECRET_KEY are required
+HWID_SALT=... SECRET_KEY=... docker compose up -d --build   # or put them in a .env file / your CI environment
 ```
 
 The app listens on port 8000 over plain HTTP. Put a TLS-terminating reverse proxy in front of it (see security notes). For large uploads and downloads, disable proxy request and response buffering and body-size limits (for nginx: `client_max_body_size 0; proxy_request_buffering off; proxy_buffering off;`; the bulk ZIP response already sends `X-Accel-Buffering: no`).
@@ -55,9 +55,11 @@ For development use. If the folder `DOWNLOAD_PATH` exists and is writable (i.e. 
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `BIND_ADDR` | `0.0.0.0` | Compose only: host interface the port is published on (e.g. `127.0.0.1` behind a reverse proxy). |
+| `HOST_PORT` | `8000` | Compose only: host port mapped to the container's 8000. |
 | `BUNNY_API` | `https://cutebunny.io` | Base URL of the Bunny server. Change this to your own server. |
-| `HWID_SALT` | `change-me` | Salt for the derived hardware ID. Set once, never change. |
-| `SECRET_KEY` | random per start | Signs the Flask session cookie. If unset, everyone is logged out on every restart (and `docker-compose.yml` ships a `change-me-too` placeholder you must replace). |
+| `HWID_SALT` | none (required in compose; app fallback `change-me`) | Salt for the derived hardware ID. Set once, never change. |
+| `SECRET_KEY` | random per start | Signs the Flask session cookie. If unset, everyone is logged out on every restart (and `docker-compose.yml` refuses to start without it). |
 | `REMEMBER_KEY` | generated in `DATA_DIR` | Fernet key for "stay signed in". |
 | `DATA_DIR` | `/data` | Where `remember.json` and `remember.key` are stored. |
 | `DOWNLOAD_PATH` | `/download` | Target folder for "Download to server" (feature appears only if it exists and is writable). |
@@ -70,7 +72,7 @@ For development use. If the folder `DOWNLOAD_PATH` exists and is writable (i.e. 
 |---|---|
 | `app.py` | The whole application: routes, templates, JS, service worker, embedded icons |
 | `Dockerfile` | Image build and gunicorn start command |
-| `docker-compose.yml` | Service definition, environment placeholders, `/data` volume |
+| `docker-compose.yml` | Service definition; every setting comes from an environment variable; `/data` volume |
 | `requirements.txt` | `flask`, `requests`, `gunicorn`, `cryptography` (unpinned) |
 | `.gitignore` | Keeps keys, `.env`, data folders, databases and caches out of git |
 
@@ -81,7 +83,7 @@ Public: `/login`, `/register`, `/manifest.webmanifest`, `/sw.js`, `/offline`, ic
 ## Security notes
 
 - **TLS is not handled here.** The session and `rt` cookies are not marked `Secure`. Run it only behind HTTPS (or on a private network such as a VPN) so cookies and credentials are not sent in clear text.
-- **Default secrets are placeholders.** Replace `HWID_SALT` and `SECRET_KEY` before use; do not commit real values.
+- **No default secrets in compose.** Compose requires `HWID_SALT` and `SECRET_KEY` to be set; supply them from the environment or a git-ignored `.env`, never commit real values.
 - **"Stay signed in" stores the account password** (encrypted). With the default setup the Fernet key and the ciphertext both live in the same `/data` volume, so anyone who can read the volume can decrypt it. Supplying `REMEMBER_KEY` from outside the volume improves this. Leave the checkbox off if that is not acceptable.
 - **Plain cookies** `lic` and `em` (license key and email) persist for a year.
 - **No CSRF tokens.** `/logout` is a plain GET, so a cross-site link can log a user out. Protection for the rest relies on `SameSite=Lax` cookies and on state-changing endpoints being POST requests, most of them requiring custom headers (`X-File-Name` and similar). There is no rate limiting or lockout on login.

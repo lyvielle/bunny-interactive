@@ -1,0 +1,32 @@
+# secrets / config
+.env
+.env.*
+*.env
+*.key
+*.pem
+remember.key
+remember.json
+secrets/
+
+# runtime data
+data/
+/download/
+*.db
+*.sqlite
+*.sqlite3
+*.part
+
+# Python / caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

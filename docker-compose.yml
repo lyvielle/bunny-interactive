@@ -1,0 +1,18 @@
+services:
+  bunny-web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      BUNNY_API: https://cutebunny.io
+      HWID_SALT: change-me
+      SECRET_KEY: change-me-too
+      DOWNLOAD_PATH: /download  # dev feature: switch appears only while this folder is mounted
+      # REMEMBER_KEY: <Fernet key>  # optional; otherwise a key is generated in the data volume
+    volumes:
+      - bunny-data:/data
+      # - ./download:/download  # uncomment to add a "Download to server" switch to the filters
+    restart: unless-stopped
+
+volumes:
+  bunny-data:

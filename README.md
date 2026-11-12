@@ -49,7 +49,7 @@ Generate a Fernet key (optional): `python -c "from cryptography.fernet import Fe
 
 ### Optional: "Download to server"
 
-For development use. Set `DOWNLOAD_ENABLED=1` and a "Download to server" switch appears in the filters (it also needs `DOWNLOAD_PATH` to exist and be writable). While it is on, the normal Download buttons save the file into that folder on the server instead of downloading to the browser. Compose always mounts `DOWNLOAD_HOST_DIR` at `DOWNLOAD_PATH`: by default a named volume `bunny-download`, or set `DOWNLOAD_HOST_DIR` to an absolute host path to bind-mount a folder. With `DOWNLOAD_ENABLED=0` (default) the switch is not shown and the endpoint returns 404.
+For development use. Set `DOWNLOAD_ENABLED=1` and a "Download to server" switch appears in the filters (it also needs `DOWNLOAD_PATH` to exist and be writable). While it is on, the normal Download buttons save the file into that folder on the server instead of downloading to the browser. Compose always bind-mounts `./download` at `DOWNLOAD_PATH`; the folder stays empty unless the feature is enabled. With `DOWNLOAD_ENABLED=0` (default) the switch is not shown and the endpoint returns 404.
 
 ## Environment variables
 
@@ -64,7 +64,6 @@ For development use. Set `DOWNLOAD_ENABLED=1` and a "Download to server" switch 
 | `DATA_DIR` | `/data` | Where `remember.json` and `remember.key` are stored. |
 | `DOWNLOAD_ENABLED` | `0` | Set `1` to show the "Download to server" switch (also requires `DOWNLOAD_PATH` to exist and be writable). |
 | `DOWNLOAD_PATH` | `/download` | Target folder inside the container for "Download to server". |
-| `DOWNLOAD_HOST_DIR` | `bunny-download` | Compose only: named volume, or an absolute host path for a bind mount, mounted at `DOWNLOAD_PATH`. |
 | `STRICT_NAMES` | `1` | Force ASCII file names on upload and rename (`0` disables). |
 | `VERIFY_TLS` | `1` | Verify the Bunny server's TLS certificate (`0` disables; avoid). |
 

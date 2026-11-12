@@ -15,10 +15,8 @@ services:
       DOWNLOAD_PATH: ${DOWNLOAD_PATH:-/download}
     volumes:
       - bunny-data:${DATA_DIR:-/data}
-      # DOWNLOAD_HOST_DIR: a named volume (default) or an absolute host path for a bind mount
-      - ${DOWNLOAD_HOST_DIR:-bunny-download}:${DOWNLOAD_PATH:-/download}
+      - ./download:${DOWNLOAD_PATH:-/download}  # stays empty unless DOWNLOAD_ENABLED=1
     restart: unless-stopped
 
 volumes:
   bunny-data:
-  bunny-download:

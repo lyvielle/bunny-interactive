@@ -61,7 +61,7 @@ For development use. Set `DOWNLOAD_ENABLED=1` and a "Download to server" switch 
 | `HWID_SALT` | none (required in compose; app fallback `change-me`) | Salt for the derived hardware ID. Set once, never change. |
 | `SECRET_KEY` | random per start | Signs the Flask session cookie. If unset, everyone is logged out on every restart (and `docker-compose.yml` refuses to start without it). |
 | `REMEMBER_KEY` | generated in `DATA_DIR` | Fernet key for "stay signed in". |
-| `DATA_DIR` | `/data` | Where `remember.json` and `remember.key` are stored. |
+| `DATA_DIR` | app: `/data`; compose: `bunny-data` | In the app: folder for `remember.json` and `remember.key`. In compose: host side of the `/data` mount, either a named volume (default) or an absolute host path for a bind mount (the container path stays `/data`). |
 | `DOWNLOAD_ENABLED` | `0` | Set `1` to show the "Download to server" switch (also requires `DOWNLOAD_PATH` to exist and be writable). |
 | `DOWNLOAD_PATH` | `/download` | Target folder inside the container for "Download to server". |
 | `STRICT_NAMES` | `1` | Force ASCII file names on upload and rename (`0` disables). |
@@ -73,7 +73,7 @@ For development use. Set `DOWNLOAD_ENABLED=1` and a "Download to server" switch 
 |---|---|
 | `app.py` | The whole application: routes, templates, JS, service worker, embedded icons |
 | `Dockerfile` | Image build and gunicorn start command |
-| `docker-compose.yml` | Service definition; every setting comes from an environment variable; `/data` volume |
+| `docker-compose.yml` | Service definition; every setting comes from an environment variable; `/data` volume or host bind mount |
 | `requirements.txt` | `flask`, `requests`, `gunicorn`, `cryptography` (unpinned) |
 | `.gitignore` | Keeps keys, `.env`, data folders, databases and caches out of git |
 

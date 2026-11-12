@@ -8,13 +8,13 @@ services:
       HWID_SALT: ${HWID_SALT:?set HWID_SALT}
       SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
       REMEMBER_KEY: ${REMEMBER_KEY:-}  # optional Fernet key; empty = generated in the data volume
-      DATA_DIR: ${DATA_DIR:-/data}
+      DATA_DIR: /data
       STRICT_NAMES: ${STRICT_NAMES:-1}
       VERIFY_TLS: ${VERIFY_TLS:-1}
       DOWNLOAD_ENABLED: ${DOWNLOAD_ENABLED:-0}  # dev feature: 1 shows the "Download to server" switch
       DOWNLOAD_PATH: ${DOWNLOAD_PATH:-/download}
     volumes:
-      - bunny-data:${DATA_DIR:-/data}
+      - ${DATA_DIR:-bunny-data}:/data  # DATA_DIR: host path for a bind mount; default is the named volume
       - ./download:${DOWNLOAD_PATH:-/download}  # stays empty unless DOWNLOAD_ENABLED=1
     restart: unless-stopped
 

@@ -49,7 +49,7 @@ Generate a Fernet key (optional): `python -c "from cryptography.fernet import Fe
 
 ### Optional: "Download to server"
 
-For development use. If the folder `DOWNLOAD_PATH` exists and is writable (i.e. a volume is mounted), a "Download to server" switch appears in the filters. While it is on, the normal Download buttons save the file into that folder on the server instead of downloading to the browser. Enable it by uncommenting the `./download:/download` line in `docker-compose.yml`. Without the mount the switch is not shown and the endpoint returns 404.
+For development use. Set `DOWNLOAD_ENABLED=1` and a "Download to server" switch appears in the filters (it also needs `DOWNLOAD_PATH` to exist and be writable). While it is on, the normal Download buttons save the file into that folder on the server instead of downloading to the browser. Compose always mounts `DOWNLOAD_HOST_DIR` at `DOWNLOAD_PATH`: by default a named volume `bunny-download`, or set `DOWNLOAD_HOST_DIR` to an absolute host path to bind-mount a folder. With `DOWNLOAD_ENABLED=0` (default) the switch is not shown and the endpoint returns 404.
 
 ## Environment variables
 
@@ -62,7 +62,9 @@ For development use. If the folder `DOWNLOAD_PATH` exists and is writable (i.e. 
 | `SECRET_KEY` | random per start | Signs the Flask session cookie. If unset, everyone is logged out on every restart (and `docker-compose.yml` refuses to start without it). |
 | `REMEMBER_KEY` | generated in `DATA_DIR` | Fernet key for "stay signed in". |
 | `DATA_DIR` | `/data` | Where `remember.json` and `remember.key` are stored. |
-| `DOWNLOAD_PATH` | `/download` | Target folder for "Download to server" (feature appears only if it exists and is writable). |
+| `DOWNLOAD_ENABLED` | `0` | Set `1` to show the "Download to server" switch (also requires `DOWNLOAD_PATH` to exist and be writable). |
+| `DOWNLOAD_PATH` | `/download` | Target folder inside the container for "Download to server". |
+| `DOWNLOAD_HOST_DIR` | `bunny-download` | Compose only: named volume, or an absolute host path for a bind mount, mounted at `DOWNLOAD_PATH`. |
 | `STRICT_NAMES` | `1` | Force ASCII file names on upload and rename (`0` disables). |
 | `VERIFY_TLS` | `1` | Verify the Bunny server's TLS certificate (`0` disables; avoid). |
 
@@ -89,7 +91,7 @@ Public: `/login`, `/register`, `/manifest.webmanifest`, `/sw.js`, `/offline`, ic
 - **No CSRF tokens.** `/logout` is a plain GET, so a cross-site link can log a user out. Protection for the rest relies on `SameSite=Lax` cookies and on state-changing endpoints being POST requests, most of them requiring custom headers (`X-File-Name` and similar). There is no rate limiting or lockout on login.
 - **Previews** are served by `/stream` with `X-Content-Type-Options: nosniff` and `Content-Security-Policy: sandbox`. Templates are rendered with Jinja autoescaping.
 - **Open redirect guard**: the `next` parameter after login only accepts same-site paths.
-- **"Download to server"** writes with the container user's permissions, reduces the name to its base file name (no path traversal), and overwrites an existing file of the same name. Any logged-in user can trigger it, so mount the folder only on a trusted single-user deployment.
+- **"Download to server"** (off unless `DOWNLOAD_ENABLED=1`) writes with the container user's permissions, reduces the name to its base file name (no path traversal), and overwrites an existing file of the same name. Any logged-in user can trigger it, so mount the folder only on a trusted single-user deployment.
 - Uploads have no size limit in this app.
 
 ## Limitations

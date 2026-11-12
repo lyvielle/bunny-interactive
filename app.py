@@ -33,11 +33,12 @@ class AuthError(Exception):
 # The server puts the stored file name into response headers, which Kestrel only allows as ASCII;
 # files with other characters (emoji, Cyrillic, ...) can't be downloaded. Keep new names ASCII.
 DOWNLOAD_PATH = os.environ.get("DOWNLOAD_PATH", "/download")
+DOWNLOAD_ENABLED = os.environ.get("DOWNLOAD_ENABLED", "0") == "1"
 
 
 def local_dl():
-    """Dev feature: only offered when DOWNLOAD_PATH exists and is writable (i.e. a volume is mounted)."""
-    return os.path.isdir(DOWNLOAD_PATH) and os.access(DOWNLOAD_PATH, os.W_OK)
+    """Dev feature: only offered when DOWNLOAD_ENABLED=1 and DOWNLOAD_PATH exists and is writable."""
+    return DOWNLOAD_ENABLED and os.path.isdir(DOWNLOAD_PATH) and os.access(DOWNLOAD_PATH, os.W_OK)
 
 
 STRICT_NAMES = os.environ.get("STRICT_NAMES", "1") == "1"
